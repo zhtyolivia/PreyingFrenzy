@@ -7,7 +7,7 @@ import {Scene_To_Texture_Demo} from "./examples/scene-to-texture-demo.js"
 import {Surfaces_Demo} from "./examples/surfaces-demo.js"
 import {Text_Demo} from "./examples/text-demo.js"
 import {Transforms_Sandbox} from "./examples/transforms-sandbox.js"
-import {Assignment1_Scene} from "./assignment1.js"
+import {Preying_Frenzy_Scene} from "./preying-frenzy.js"
 
 // Pull these names into this module's scope for convenience:
 const {
@@ -34,13 +34,13 @@ Object.assign(defs,
     {Surfaces_Demo},
     {Text_Demo},
     {Transforms_Sandbox},
-    {Assignment1_Scene});
+    {Preying_Frenzy_Scene});
 
 // ******************** End extra step
 
 // (Can define Main_Scene's class here)
 
-const Main_Scene = Assignment1_Scene;
+const Main_Scene = Preying_Frenzy_Scene;
 const Additional_Scenes = [];
 
 export {Main_Scene, Additional_Scenes, Canvas_Widget, Code_Widget, Text_Widget, defs}
