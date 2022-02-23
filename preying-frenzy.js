@@ -198,8 +198,7 @@ export class Preying_Frenzy_Scene extends Base_Scene {
                 .times(Mat4.scale(0.75, 0.75, 1, 0)); 
             this.shapes.fish_tail.draw(context, program_state, fish_tail_transform, this.materials.fish_tail); 
         } else {
-            /* TODO: create a new fish when a fish exits from the left edge */ 
-            // this.fishes_x[fish_index] = Math.floor(Math.random() * 46 - 28); 
+            // Create a new fish when a fish exits from the left edge
             this.fishes_x[fish_index] = 18;
             this.fishes_y[fish_index] = Math.floor(Math.random() * 20); 
             this.fishes_time_offset[fish_index] = t; 
