@@ -10,50 +10,60 @@ class Base_Scene extends Scene{
 
     constructor() {
         super(); 
-        // ---------- Set camera position --------- //
+        // -------------------- Set camera position ------------------- //
         this.initial_camera_position = Mat4.translation(5, -10, -30); 
-        // ---------- Sounds and music ------------ //
+        // -------------------- Sounds and music ---------------------- //
         
-        // ---------- Light color ----------------- //
+        // -------------------- Light color --------------------------- //
         this.light_color = color(1,1,1,1);
         this.light_position = this.light_position = vec4(-5, 20, 5, 1);
 
-        // ---------- Shape definitions ----------- //
+        // -------------------- Shape definitions --------------------- //
         this.shapes = {
             // Shapes for player fish 
             player_fish_body: new defs.Subdivision_Sphere(4),
-            player_fish_tail: new defs.Triangle(),
-
-            // Shape for text 
-            // text: new Text_Line(35),
+            
+            // Shapes for the smaller fishes 
+            fish_body: new defs.Subdivision_Sphere(4), 
+            fish_tail: new defs.Triangle(),
+            
         }
 
-        // ---------- Material definisions --------- //
+        // -------------------- Material definisions ------------------- //
         this.materials = {
-            // Environment  
-            // water: new Material(textured, {ambient: .5, texture: new Texture("assets/water.jpeg")}),
-            // sand: new Material(new Shadow_Textured_Phong_Shader(1), 
-                // {ambient: 0.3, diffusivity: .9, color: hex_color("#ffaf40"), smoothness: 64,
-                // color_texture: new Texture("assets/sand3.png"),
-                // light_depth_texture: null}),
-            // Shark 
-            shark: new Material(new Gouraud_Shader(),
-                {ambient: .4, diffusivity: .6, color: hex_color("#BFD8E0")}),              
-            // eye: new Material(new defs.Phong_Shader(),
-            //     {ambient: .4, diffusivity: .6, color: hex_color("#000000")}),
+            // Environment / background 
+            
+            // Bigger fish / shark / octopus / whatever 
+            
             // Player fish 
             player_fish: new Material(new Gouraud_Shader(),
-                {ambient: .4, diffusivity: .6, color: hex_color("#33ccff")}),               
+                {ambient: .4, diffusivity: .6, color: hex_color("#FFC0CB")}),               
             player_fish_tail: new Material(new Tail_Shader(),
-                {ambient: .4, diffusivity: .6, color: hex_color("#0099ff")}),
+                {ambient: .4, diffusivity: .6, color: hex_color("#FFC0CB")}),
+            
+            // Smaller fishes 
+            fish: new Material(new Gouraud_Shader(),
+                {ambient: .4, diffusivity: .6, color: hex_color("#FAD02C")}), 
+            fish_tail: new Material(new Gouraud_Shader(),
+                {ambient: .4, diffusivity: .6, color: hex_color("#FAD02C")}),
         }
 
-        // ---------- Positions ----------------- //
+        // -------------------- Positions --------------------------- //
         this.player_x_pos = 0; 
         this.player_y_pos = 0; 
 
-        // ---------- Players stats ------------- //
+        // -------------------- Players stats ----------------------- //
         this.alive = true; 
+
+        // -------- Smaller fishes and larger fishes/shraks ----------// 
+        // Small fishes: x_pos is in [-28, 18] and y_pos is in [0, 20]. 
+
+        // Initially, 10 fishes are randomly places in the scene and time offsets are maked as zero. 
+        this.fishes_x = Array.from({length: 10}, () => Math.floor(Math.random() * 46 - 28));
+        this.fishes_y = Array.from({length: 10}, () => Math.floor(Math.random() * 20));
+        this.fishes_time_offset = Array(10).fill(0); 
+        this.fish_num = 10; // there are always ten small fishes in the scene 
+        this.fish_speed = 2; 
     }
     
 }
@@ -72,7 +82,7 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         program_state.set_camera(this.initial_camera_position); 
         program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 100); 
 
-        this.display_scene(context, program_state, false, false, false);
+        this.display_scene(context, program_state);
     }
 
     make_control_panel() {
@@ -98,14 +108,14 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         })
         // Right movement 
         this.key_triggered_button("Right", ["ArrowRight"], () => {
-            if (this.player_x_pos < 20) {
+            if (this.player_x_pos < 18) {
                 this.player_x_pos += 1; 
             }
         })
     }
 
-    display_scene(context, program_state, shadow_pass, draw_light_source=false, draw_shadow=false){
-        let model_tranform = Mat4.identity(); 
+    display_scene(context, program_state){
+        let model_transform = Mat4.identity(); 
         const t = program_state.animation_time, dt = program_state.animation_delta_time / 1000;
 
         // Light 
@@ -116,30 +126,87 @@ export class Preying_Frenzy_Scene extends Base_Scene {
 
         // Draw accumulated points and buttons 
 
-        // Draw user fish 
+        // Draw smaller fishes 
+        if (this.alive) {
+            for (let i = 0; i < this.fish_num; i++) {
+                this.display_small_fish(context, program_state, model_transform, i, t/1000);
+                /* TODO: detect collision here */
+            }
+            
+        }
+        // Draw player fish 
+        if (this.alive) {
+            this.display_player_fish(context, program_state, model_transform); 
+        }
+        
+        
+    }
+
+    display_player_fish(context, program_state, model_transform ) {
+        // Draw player fish 
         var x = this.player_x_pos; 
         var y = this.player_y_pos; 
 
         if (this.alive) {
             // Draw player fish body 
-            var player_fish_body_transform = model_tranform; 
+            var player_fish_body_transform = model_transform; 
             player_fish_body_transform = player_fish_body_transform
                 .times(Mat4.scale(1.5, 1, 1, 0))
                 .times(Mat4.translation(x/2, y/4, 0, 0));
             this.shapes.player_fish_body.draw(context, program_state, player_fish_body_transform, this.materials.player_fish); 
+
             // Draw player fish tail 
             var player_fish_tail_transform = player_fish_body_transform;
             player_fish_tail_transform = player_fish_tail_transform
                 .times(Mat4.scale(2/1.5, 2, 1, 0))
                 .times(Mat4.translation(-0.6, 0, 0))
                 .times(Mat4.rotation(-Math.PI*1.25, 0, 0, 1)); 
-            this.shapes.player_fish_tail.draw(context, program_state, player_fish_tail_transform, this.materials.player_fish_tail)
+            this.shapes.fish_tail.draw(context, program_state, player_fish_tail_transform, this.materials.player_fish_tail);
+
+            // Draw the player fish fins
+            var player_fish_fin_transform_above = player_fish_body_transform; 
+            player_fish_fin_transform_above = player_fish_fin_transform_above.times(Mat4.translation(0.4,0.8,0,0))
+                .times(Mat4.rotation(-Math.PI*1.25, 0, 0, 1));
+            this.shapes.fish_tail.draw(context, program_state, player_fish_fin_transform_above, this.materials.fish_tail.override({color:hex_color("#FFC0CB")}));
+            
+            var player_fish_fin_transform_below = player_fish_body_transform; 
+            player_fish_fin_transform_below = player_fish_fin_transform_below.times(Mat4.translation(0.4,-0.8,0,0))
+                .times(Mat4.rotation(-Math.PI*1.25, 0, 0, 1));
+            this.shapes.fish_tail.draw(context, program_state, player_fish_fin_transform_below, this.materials.fish_tail.override({color:hex_color("#FFC0CB")}));
+        
+        }
+    }
+
+    display_small_fish(context, program_state, model_transform, fish_index, t) {
+        // var: function scoped 
+        // let: block scoped 
+        var fish = []; 
+        var x_pos = this.fishes_x[fish_index]; 
+        var y_pos = this.fishes_y[fish_index]; 
+        var delta_x = this.fish_speed * (t - this.fishes_time_offset[fish_index]); 
+        var x_pos_new = x_pos - delta_x; 
+        if (x_pos_new > -28) {
+            // Body
+            let fish_transform = model_transform;
+            fish_transform = fish_transform.times(Mat4.translation(x_pos_new, y_pos, 0, 0))
+                .times(Mat4.scale(0.75, 0.6, 0.5, 0));
+            this.shapes.fish_body.draw(context, program_state, fish_transform, this.materials.fish); 
+            // Tail 
+            let fish_tail_transform = model_transform;
+            fish_tail_transform = fish_tail_transform.times(Mat4.translation(x_pos_new + 0.6, y_pos, 0, 0))
+                .times(Mat4.rotation(Math.PI*1.75, 0, 0, 1))
+                .times(Mat4.scale(0.75, 0.75, 1, 0)); 
+            this.shapes.fish_tail.draw(context, program_state, fish_tail_transform, this.materials.fish_tail); 
+        } else {
+            /* TODO: create a new fish when a fish exits from the left edge */ 
+            // this.fishes_x[fish_index] = Math.floor(Math.random() * 46 - 28); 
+            this.fishes_x[fish_index] = 18;
+            this.fishes_y[fish_index] = Math.floor(Math.random() * 20); 
+            this.fishes_time_offset[fish_index] = t; 
         }
     }
 
 }
-
-// Shaders 
 
 
 class Gouraud_Shader extends Shader {
@@ -212,7 +279,11 @@ class Gouraud_Shader extends Shader {
                 // The final normal vector in screen space.
                 N = normalize( mat3( model_transform ) * normal / squared_scale);
                 vertex_worldspace = ( model_transform * vec4( position, 1.0 ) ).xyz;
+
+                // color calculation occurs in the vertex shader 
+                // Compute an initial (ambient) color:
                 vertex_color = vec4(shape_color.xyz * ambient, shape_color.w);
+                // Compute the final color with contributions from lights:
                 vertex_color.xyz += phong_model_lights(N, vertex_worldspace);
             } `;
     }
@@ -224,7 +295,6 @@ class Gouraud_Shader extends Shader {
         return this.shared_glsl_code() + `
             void main(){
                 gl_FragColor = vertex_color;
-                return;
             } `;
     }
 
@@ -362,7 +432,11 @@ class Tail_Shader extends Shader {
                 
                 center = model_transform * vec4(0.0, 0.0, 0.0, 1.0);
                 point_position = model_transform * vec4(position, 1.0);
+
+                // color calculation occurs in the vertex shader 
+                // Compute an initial (ambient) color:
                 vertex_color = vec4(shape_color.xyz * ambient, shape_color.w);
+                // Compute the final color with contributions from lights:
                 vertex_color.xyz += phong_model_lights(N, vertex_worldspace);
             } `;
     }
@@ -373,7 +447,7 @@ class Tail_Shader extends Shader {
         // Fragments affect the final image or get discarded due to depth.
         return this.shared_glsl_code() + `
             void main(){
-                 float scalar = cos(distance(point_position.xyz, center.xyz));
+                 float scalar = cos(0.3 + distance(point_position.xyz, center.xyz));
                  gl_FragColor = scalar * vertex_color;
             } `;
     }
