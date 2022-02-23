@@ -23,8 +23,8 @@ Rules of the game:
 **Model transform**: we used translation, rotation, and scaling to transform the shapes to what we desire. \
 **User interaction**: by making a control panel, we enable player to move the fish in the four directions within the screen through the button on the control panel or the key strokes. 
 **Shapes**: we used spheres and triangles to construct bodies, tails, and fins of different fishes. \
-**Animation**: we use animation time to let small fishes move at a certain speed. \
+**Animation**: we use animation time to let small fishes move at a certain speed.
 
 ## Team Members  
 **Hongye Li**: laurali233 \
-**Olivia Zhang**: zhtyolivia \
+**Olivia Zhang**: zhtyolivia
