@@ -29,6 +29,9 @@ class Base_Scene extends Scene{
             shark_body: new defs.Subdivision_Sphere(4),
             shark_tail: new defs.Triangle(),
             shark_fin: new defs.Closed_Cone(15,15),
+
+            // Shapes for the environment
+            environment_sphere: new defs.Subdivision_Sphere(4), 
             
         }
 
@@ -51,6 +54,9 @@ class Base_Scene extends Scene{
                 {ambient: .4, diffusivity: .6, color: hex_color("#FAD02C")}),
             shark: new Material(new Gouraud_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#F0FFFF")}),
+            environment_sphere: new Material(new Gouraud_Shader(),
+                {ambient: .4, diffusivity: .6, color: hex_color("#00A3FF")}),
+            
         }
 
         // -------------------- Positions --------------------------- //
@@ -136,6 +142,8 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         let light_color = this.light_color; 
 
         // Draw background 
+
+        this.display_environment(context, program_state, model_transform);
 
         // Draw accumulated points and buttons 
 
@@ -263,6 +271,13 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             this.sharks_time_offset[shark_index] = t;
         }
         
+        
+    }
+
+    display_environment(context, program_state, model_tranform){
+        let environment_transform = model_tranform;
+        environment_transform = environment_transform.times(Mat4.scale(80,80,50));
+        this.shapes.environment_sphere.draw(context, program_state, environment_transform, this.materials.environment_sphere);
         
     }
 
