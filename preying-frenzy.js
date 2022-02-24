@@ -26,6 +26,12 @@ class Base_Scene extends Scene{
             // Shapes for the smaller fishes 
             fish_body: new defs.Subdivision_Sphere(4), 
             fish_tail: new defs.Triangle(),
+            shark_body: new defs.Subdivision_Sphere(4),
+            shark_tail: new defs.Triangle(),
+            shark_fin: new defs.Closed_Cone(15,15),
+
+            // Shapes for the environment
+            environment_sphere: new defs.Subdivision_Sphere(4), 
             
         }
 
@@ -46,6 +52,11 @@ class Base_Scene extends Scene{
                 {ambient: .4, diffusivity: .6, color: hex_color("#FAD02C")}), 
             fish_tail: new Material(new Gouraud_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#FAD02C")}),
+            shark: new Material(new Gouraud_Shader(),
+                {ambient: .4, diffusivity: .6, color: hex_color("#F0FFFF")}),
+            environment_sphere: new Material(new Gouraud_Shader(),
+                {ambient: .4, diffusivity: .6, color: hex_color("#00A3FF")}),
+            
         }
 
         // -------------------- Positions --------------------------- //
@@ -59,11 +70,19 @@ class Base_Scene extends Scene{
         // Small fishes: x_pos is in [-28, 18] and y_pos is in [0, 20]. 
 
         // Initially, 10 fishes are randomly places in the scene and time offsets are maked as zero. 
-        this.fishes_x = Array.from({length: 10}, () => Math.floor(Math.random() * 46 - 28));
+        this.fishes_x = Array.from({length: 10}, () => Math.floor(Math.random() * 20 - 20));
         this.fishes_y = Array.from({length: 10}, () => Math.floor(Math.random() * 20));
         this.fishes_time_offset = Array(10).fill(0); 
         this.fish_num = 10; // there are always ten small fishes in the scene 
         this.fish_speed = 2; 
+
+        // Initially, 5 sharks are randomly places in the scene
+        this.sharks_x = Array.from({length: 5}, () => Math.floor(Math.random() * 46 - 28));
+        this.sharks_y = Array.from({length: 5}, () => Math.floor(Math.random() * 10));
+        this.sharks_time_offset = Array(5).fill(0); 
+        this.shark_num = 5; // there are always ten small fishes in the scene 
+        this.shark_speed = 1.5; 
+        
     }
     
 }
@@ -124,6 +143,8 @@ export class Preying_Frenzy_Scene extends Base_Scene {
 
         // Draw background 
 
+        this.display_environment(context, program_state, model_transform);
+
         // Draw accumulated points and buttons 
 
         // Draw smaller fishes 
@@ -138,7 +159,14 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         if (this.alive) {
             this.display_player_fish(context, program_state, model_transform); 
         }
-        
+
+        // draw sharks
+        if (this.alive) {
+            for (let j = 0; j < this.shark_num; j++){
+            this.display_shark(context, program_state, model_transform, j, t/1000);
+            
+        }
+        }
         
     }
 
@@ -203,6 +231,53 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             this.fishes_y[fish_index] = Math.floor(Math.random() * 20); 
             this.fishes_time_offset[fish_index] = t; 
         }
+    }
+
+    display_shark(context, program_state, model_tranform, shark_index, t){
+        var shark = [];
+        var x_coord = this.sharks_x[shark_index];
+        var y_coord = this.sharks_y[shark_index];
+        var delta_x2 = this.shark_speed * (t - this.sharks_time_offset[shark_index]);
+        var x_coord_new = x_coord - delta_x2;
+        if (x_coord_new > -20){
+            // Body
+            let shark_transform = model_tranform;
+            shark_transform = shark_transform.times(Mat4.scale(3,1.5,1))
+                .times(Mat4.translation(x_coord_new, y_coord,0));
+            // Tail
+            let shark_tail_transform = model_tranform;
+            shark_tail_transform = shark_transform.times(Mat4.translation(0.8,0,0))
+                .times(Mat4.scale(0.5,1.5,1))
+                .times(Mat4.rotation(-Math.PI*0.25, 0, 0, 1));
+            // Fin1
+            let shark_fin_transform = model_tranform;
+            shark_fin_transform = shark_transform.times(Mat4.scale(1/3,1/1.5,1))
+                .times(Mat4.translation(-0.3,1.6,0))
+                .times(Mat4.rotation(-Math.PI*0.48,3,0,1));
+            // Fin2
+            let shark_fin2_transform = model_tranform;
+            shark_fin2_transform = shark_transform.times(Mat4.scale(1/3,1/1.5,1))
+                .times(Mat4.translation(-0.3,-1.5,-0.5))
+                .times(Mat4.rotation(Math.PI*0.6,10,0,1));
+        
+            this.shapes.shark_tail.draw(context, program_state, shark_tail_transform, this.materials.shark);
+            this.shapes.shark_body.draw(context, program_state, shark_transform, this.materials.shark);
+            this.shapes.shark_fin.draw(context, program_state, shark_fin_transform, this.materials.shark);
+            this.shapes.shark_fin.draw(context, program_state, shark_fin2_transform, this.materials.shark);
+        } else {
+            this.sharks_x[shark_index] = 18;
+            this.sharks_y[shark_index] = Math.floor(Math.random() * 20); 
+            this.sharks_time_offset[shark_index] = t;
+        }
+        
+        
+    }
+
+    display_environment(context, program_state, model_tranform){
+        let environment_transform = model_tranform;
+        environment_transform = environment_transform.times(Mat4.scale(80,80,50));
+        this.shapes.environment_sphere.draw(context, program_state, environment_transform, this.materials.environment_sphere);
+        
     }
 
 }
