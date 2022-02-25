@@ -57,7 +57,7 @@ class Base_Scene extends Scene{
             shark: new Material(new Gouraud_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#F0FFFF")}),
             environment_sphere: new Material(textured,
-                {ambient: 1, texture: new Texture("./assets/ocean-image.png")}),
+                {ambient: 1, texture: new Texture("./assets/ocean.png")}),
             
         }
 
@@ -277,7 +277,8 @@ export class Preying_Frenzy_Scene extends Base_Scene {
 
     display_environment(context, program_state, model_tranform){
         let environment_transform = model_tranform;
-        environment_transform = environment_transform.times(Mat4.scale(50,50,40));
+        environment_transform = environment_transform.times(Mat4.translation(-10,10,2))
+            .times(Mat4.scale(28,30,34));
         this.shapes.environment_sphere.draw(context, program_state, environment_transform, this.materials.environment_sphere);
         
     }
