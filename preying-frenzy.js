@@ -57,7 +57,7 @@ class Base_Scene extends Scene{
             shark: new Material(new Gouraud_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#F0FFFF")}),
             environment_sphere: new Material(textured,
-                {ambient: .5, texture: new Texture("./assets/stars.png")}),
+                {ambient: 1, texture: new Texture("./assets/ocean-image.png")}),
             
         }
 
