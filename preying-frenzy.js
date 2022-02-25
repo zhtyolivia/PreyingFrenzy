@@ -35,6 +35,8 @@ class Base_Scene extends Scene{
             
         }
 
+        const textured = new defs.Textured_Phong(1);
+
         // -------------------- Material definisions ------------------- //
         this.materials = {
             // Environment / background 
@@ -54,8 +56,8 @@ class Base_Scene extends Scene{
                 {ambient: .4, diffusivity: .6, color: hex_color("#FAD02C")}),
             shark: new Material(new Gouraud_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#F0FFFF")}),
-            environment_sphere: new Material(new Gouraud_Shader(),
-                {ambient: .4, diffusivity: .6, color: hex_color("#00A3FF")}),
+            environment_sphere: new Material(textured,
+                {ambient: .5, texture: new Texture("./assets/stars.png")}),
             
         }
 
@@ -276,7 +278,7 @@ export class Preying_Frenzy_Scene extends Base_Scene {
 
     display_environment(context, program_state, model_tranform){
         let environment_transform = model_tranform;
-        environment_transform = environment_transform.times(Mat4.scale(80,80,50));
+        environment_transform = environment_transform.times(Mat4.scale(50,50,40));
         this.shapes.environment_sphere.draw(context, program_state, environment_transform, this.materials.environment_sphere);
         
     }
