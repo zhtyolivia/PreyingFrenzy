@@ -26,6 +26,8 @@ class Base_Scene extends Scene{
             // Shapes for the smaller fishes 
             fish_body: new defs.Subdivision_Sphere(4), 
             fish_tail: new defs.Triangle(),
+
+            // Shapes for the sharks 
             shark_body: new defs.Subdivision_Sphere(4),
             shark_tail: new defs.Triangle(),
             shark_fin: new defs.Closed_Cone(15,15),
@@ -35,14 +37,19 @@ class Base_Scene extends Scene{
             
         }
 
+        // Textured Phone Shader 
         const textured = new defs.Textured_Phong(1);
 
         // -------------------- Material definisions ------------------- //
         this.materials = {
             // Environment / background 
-            
+            environment_sphere: new Material(textured,
+                {ambient: 1, texture: new Texture("./assets/ocean.png")}),
+
             // Bigger fish / shark / octopus / whatever 
-            
+            shark: new Material(new Gouraud_Shader(),
+                {ambient: .4, diffusivity: .6, color: hex_color("#F0FFFF")}),
+
             // Player fish 
             player_fish: new Material(new Gouraud_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#FFC0CB")}),               
@@ -54,11 +61,7 @@ class Base_Scene extends Scene{
                 {ambient: .4, diffusivity: .6, color: hex_color("#FAD02C")}), 
             fish_tail: new Material(new Gouraud_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#FAD02C")}),
-            shark: new Material(new Gouraud_Shader(),
-                {ambient: .4, diffusivity: .6, color: hex_color("#F0FFFF")}),
-            environment_sphere: new Material(textured,
-                {ambient: 1, texture: new Texture("./assets/ocean.png")}),
-            
+
         }
 
         // -------------------- Positions --------------------------- //
@@ -67,10 +70,11 @@ class Base_Scene extends Scene{
 
         // -------------------- Players stats ----------------------- //
         this.alive = true; 
+        this.credit_count = 0; 
 
         // -------- Smaller fishes and larger fishes/shraks ----------// 
-        // Small fishes: x_pos is in [-28, 18] and y_pos is in [0, 20]. 
 
+        // Small fishes: x_pos is in [-28, 18] and y_pos is in [0, 20]. 
         // Initially, 10 fishes are randomly places in the scene and time offsets are maked as zero. 
         this.fishes_x = Array.from({length: 10}, () => Math.floor(Math.random() * 20 - 20));
         this.fishes_y = Array.from({length: 10}, () => Math.floor(Math.random() * 20));
@@ -78,11 +82,12 @@ class Base_Scene extends Scene{
         this.fish_num = 10; // there are always ten small fishes in the scene 
         this.fish_speed = 2; 
 
+        // TODO: adjust shark position boundaries!!!!
         // Initially, 5 sharks are randomly places in the scene
         this.sharks_x = Array.from({length: 5}, () => Math.floor(Math.random() * 46 - 28));
         this.sharks_y = Array.from({length: 5}, () => Math.floor(Math.random() * 10));
         this.sharks_time_offset = Array(5).fill(0); 
-        this.shark_num = 5; // there are always ten small fishes in the scene 
+        this.shark_num = 5; // there are always five sharks in the scene 
         this.shark_speed = 1.5; 
         
     }
@@ -92,7 +97,6 @@ class Base_Scene extends Scene{
 export class Preying_Frenzy_Scene extends Base_Scene {
 
     display(context, program_state) {
-        // const gl = context.context; 
         let model_tranform = Mat4.identity(); 
 
         // Lights 
@@ -162,12 +166,11 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             this.display_player_fish(context, program_state, model_transform); 
         }
 
-        // draw sharks
+        // Draw sharks
         if (this.alive) {
             for (let j = 0; j < this.shark_num; j++){
-            this.display_shark(context, program_state, model_transform, j, t/1000);
-            
-        }
+                this.display_shark(context, program_state, model_transform, j, t/1000);  
+            }
         }
         
     }
@@ -287,9 +290,6 @@ export class Preying_Frenzy_Scene extends Base_Scene {
 
 
 class Gouraud_Shader extends Shader {
-    // This is a Shader using Phong_Shader as template
-    // TODO: Modify the glsl coder here to create a Gouraud Shader (Planet 2)
-
     constructor(num_lights = 2) {
         super();
         this.num_lights = num_lights;
@@ -367,8 +367,6 @@ class Gouraud_Shader extends Shader {
 
     fragment_glsl_code() {
         // ********* FRAGMENT SHADER *********
-        // A fragment is a pixel that's overlapped by the current triangle.
-        // Fragments affect the final image or get discarded due to depth.
         return this.shared_glsl_code() + `
             void main(){
                 gl_FragColor = vertex_color;
@@ -376,8 +374,6 @@ class Gouraud_Shader extends Shader {
     }
 
     send_material(gl, gpu, material) {
-        // send_material(): Send the desired shape-wide material qualities to the
-        // graphics card, where they will tweak the Phong lighting formula.
         gl.uniform4fv(gpu.shape_color, material.color);
         gl.uniform1f(gpu.ambient, material.ambient);
         gl.uniform1f(gpu.diffusivity, material.diffusivity);
@@ -520,8 +516,6 @@ class Tail_Shader extends Shader {
 
     fragment_glsl_code() {
         // ********* FRAGMENT SHADER *********
-        // A fragment is a pixel that's overlapped by the current triangle.
-        // Fragments affect the final image or get discarded due to depth.
         return this.shared_glsl_code() + `
             void main(){
                  float scalar = cos(0.3 + distance(point_position.xyz, center.xyz));
