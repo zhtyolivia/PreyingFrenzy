@@ -84,11 +84,15 @@ class Base_Scene extends Scene{
 
         // TODO: adjust shark position boundaries!!!!
         // Initially, 5 sharks are randomly places in the scene
-        this.sharks_x = Array.from({length: 5}, () => Math.floor(Math.random() * 6.5 - 1.5));
-        this.sharks_y = Array.from({length: 5}, () => Math.floor(Math.random() * 12));
-        this.sharks_time_offset = Array(5).fill(0); 
-        this.shark_num = 5; // there are always five sharks in the scene 
-        this.shark_speed = 1.5; 
+        this.sharks_x = Array.from({length: 4}, () => Math.floor(Math.random() * 6.5 - 1.5));
+        this.sharks_y = [Math.floor(Math.random() * 3), Math.floor(Math.random() * 3 + 4), Math.floor(Math.random() * 3 + 7), Math.floor(Math.random() * 3 + 11)];
+        //this.shark_y[0] = Math.floor(Math.random() * 4);
+        //this.shark_y[1] = Math.floor(Math.random() * 3 + 4);
+        //this.shark_y[2] = Math.floor(Math.random() * 3 + 7);
+        //this.shark_y[3] = Math.floor(Math.random() * 3 + 10);
+        this.sharks_time_offset = Array(4).fill(0); 
+        this.shark_num = 4; // there are always five sharks in the scene 
+        this.shark_speed = 1; 
         
     }
     
@@ -271,7 +275,19 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             this.shapes.shark_fin.draw(context, program_state, shark_fin2_transform, this.materials.shark);
         } else {
             this.sharks_x[shark_index] = 7;
-            this.sharks_y[shark_index] = Math.floor(Math.random() * 12); 
+            if (y_coord >= 0 && y_coord <= 3){
+                this.sharks_y[shark_index] = Math.floor(Math.random() * 3);
+            }
+            else if (y_coord > 3 && y_coord <= 6){
+                this.sharks_y[shark_index] = Math.floor(Math.random() * 3 + 4);
+            }
+            else if(y_coord > 6 && y_coord <= 9) {
+                this.sharks_y[shark_index] = Math.floor(Math.random() * 3 + 7);
+            }
+            else{
+                this.sharks_y[shark_index] = Math.floor(Math.random() * 3 + 11);
+            }
+            //this.sharks_y[shark_index] = Math.floor(Math.random() * 13); 
             this.sharks_time_offset[shark_index] = t;
         }
         
