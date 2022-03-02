@@ -84,8 +84,8 @@ class Base_Scene extends Scene{
 
         // TODO: adjust shark position boundaries!!!!
         // Initially, 5 sharks are randomly places in the scene
-        this.sharks_x = Array.from({length: 5}, () => Math.floor(Math.random() * 46 - 28));
-        this.sharks_y = Array.from({length: 5}, () => Math.floor(Math.random() * 10));
+        this.sharks_x = Array.from({length: 5}, () => Math.floor(Math.random() * 6.5 - 1.5));
+        this.sharks_y = Array.from({length: 5}, () => Math.floor(Math.random() * 12));
         this.sharks_time_offset = Array(5).fill(0); 
         this.shark_num = 5; // there are always five sharks in the scene 
         this.shark_speed = 1.5; 
@@ -244,7 +244,7 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         var y_coord = this.sharks_y[shark_index];
         var delta_x2 = this.shark_speed * (t - this.sharks_time_offset[shark_index]);
         var x_coord_new = x_coord - delta_x2;
-        if (x_coord_new > -20){
+        if (x_coord_new > -10.5){
             // Body
             let shark_transform = model_tranform;
             shark_transform = shark_transform.times(Mat4.scale(3,1.5,1))
@@ -270,8 +270,8 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             this.shapes.shark_fin.draw(context, program_state, shark_fin_transform, this.materials.shark);
             this.shapes.shark_fin.draw(context, program_state, shark_fin2_transform, this.materials.shark);
         } else {
-            this.sharks_x[shark_index] = 18;
-            this.sharks_y[shark_index] = Math.floor(Math.random() * 20); 
+            this.sharks_x[shark_index] = 7;
+            this.sharks_y[shark_index] = Math.floor(Math.random() * 12); 
             this.sharks_time_offset[shark_index] = t;
         }
         
@@ -280,7 +280,7 @@ export class Preying_Frenzy_Scene extends Base_Scene {
 
     display_environment(context, program_state, model_tranform){
         let environment_transform = model_tranform;
-        environment_transform = environment_transform.times(Mat4.translation(-10,10,2))
+        environment_transform = environment_transform.times(Mat4.translation(-8,10,2))
             .times(Mat4.scale(28,30,34));
         this.shapes.environment_sphere.draw(context, program_state, environment_transform, this.materials.environment_sphere);
         
