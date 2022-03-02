@@ -74,6 +74,12 @@ class Base_Scene extends Scene{
         // -------------------- Players stats ----------------------- //
         this.alive = true; 
         this.credit_count = 0; 
+        this.player_colors = [hex_color('#7DAD80'), 
+                            hex_color('#8DAD51'), 
+                            hex_color('#AD8C8F'),
+                            hex_color('#AD6561'),
+                            hex_color('#7199AD')];
+        this.player_color_index = 0; 
 
         // -------- Smaller fishes and larger fishes/shraks ----------// 
 
@@ -144,6 +150,14 @@ export class Preying_Frenzy_Scene extends Base_Scene {
                 this.player_x_pos += 1; 
             }
         })
+        // Right movement 
+        this.key_triggered_button("Change Color", ["c"], () => {
+            if (this.player_color_index <= this.player_colors.length - 2) {
+                this.player_color_index += 1; 
+            } else {
+                this.player_color_index = 0; 
+            }
+        })
     }
 
     display_scene(context, program_state){
@@ -186,6 +200,7 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         // Draw player fish 
         var x = this.player_x_pos; 
         var y = this.player_y_pos; 
+        var color = this.player_colors[this.player_color_index]; 
 
         if (this.alive) {
             // Draw player fish body 
@@ -193,7 +208,7 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             player_fish_body_transform = player_fish_body_transform
                 .times(Mat4.scale(1.5, 1, 1, 0))
                 .times(Mat4.translation(x/2, y/4, 0, 0));
-            this.shapes.player_fish_body.draw(context, program_state, player_fish_body_transform, this.materials.player_fish); 
+            this.shapes.player_fish_body.draw(context, program_state, player_fish_body_transform, this.materials.player_fish.override({color:color})); 
 
             // Draw player fish tail 
             var player_fish_tail_transform = player_fish_body_transform;
@@ -201,19 +216,18 @@ export class Preying_Frenzy_Scene extends Base_Scene {
                 .times(Mat4.scale(2/1.5, 2, 1, 0))
                 .times(Mat4.translation(-0.6, 0, 0))
                 .times(Mat4.rotation(-Math.PI*1.25, 0, 0, 1)); 
-            this.shapes.fish_tail.draw(context, program_state, player_fish_tail_transform, this.materials.player_fish_tail);
+            this.shapes.fish_tail.draw(context, program_state, player_fish_tail_transform, this.materials.player_fish_tail.override({color:color}));
 
             // Draw the player fish fins
             var player_fish_fin_transform_above = player_fish_body_transform; 
             player_fish_fin_transform_above = player_fish_fin_transform_above.times(Mat4.translation(0.4,0.8,0,0))
                 .times(Mat4.rotation(-Math.PI*1.25, 0, 0, 1));
-            this.shapes.fish_tail.draw(context, program_state, player_fish_fin_transform_above, this.materials.fish_tail.override({color:hex_color("#FFC0CB")}));
+            this.shapes.fish_tail.draw(context, program_state, player_fish_fin_transform_above, this.materials.fish_tail.override({color:color}));
             
             var player_fish_fin_transform_below = player_fish_body_transform; 
             player_fish_fin_transform_below = player_fish_fin_transform_below.times(Mat4.translation(0.4,-0.8,0,0))
                 .times(Mat4.rotation(-Math.PI*1.25, 0, 0, 1));
-            this.shapes.fish_tail.draw(context, program_state, player_fish_fin_transform_below, this.materials.fish_tail.override({color:hex_color("#FFC0CB")}));
-        
+            this.shapes.fish_tail.draw(context, program_state, player_fish_fin_transform_below, this.materials.fish_tail.override({color:color}));
         }
     }
 
