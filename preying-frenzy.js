@@ -1,5 +1,6 @@
 import {defs, tiny} from './examples/common.js';
 import {Gouraud_Shader, Tail_Shader, Shark_Body_Shader} from  './examples/shaders.js';
+import { Text_Line } from './examples/text-demo.js';
 
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Matrix, Mat4, Light, Shape, Shader, Texture, Material, Scene,
@@ -13,11 +14,21 @@ class Base_Scene extends Scene{
         super(); 
         // -------------------- Set camera position ------------------- //
         this.initial_camera_position = Mat4.translation(5, -10, -30); 
+
         // -------------------- Sounds and music ---------------------- //
         
+
         // -------------------- Light color --------------------------- //
         this.light_color = color(1,1,1,1);
         this.light_position = this.light_position = vec4(-5, 20, 5, 1);
+        
+    }
+    
+}
+
+export class Preying_Frenzy_Scene extends Base_Scene {
+    constructor() {
+        super(); 
 
         // -------------------- Shape definitions --------------------- //
         this.shapes = {
@@ -36,6 +47,9 @@ class Base_Scene extends Scene{
             // Shapes for the environment
             environment_sphere: new defs.Subdivision_Sphere(4), 
             
+            // Shape for text 
+            text: new Text_Line(35),
+            square: new defs.Square(),
         }
 
         // Textured Phone Shader 
@@ -65,6 +79,12 @@ class Base_Scene extends Scene{
             fish_tail: new Material(new Gouraud_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#FAD02C")}),
 
+            // Text for credit display 
+            credit_text: new Material(textured, {
+                ambient: 1, diffusivity: 0, specularity: 0, texture: new Texture("assets/text.png")}),
+            credit_square: new Material(new Gouraud_Shader, 
+                {ambient: 0.4, diffusivity: .9, specularity: 1, color: vec4(1.0, 1.0, 1.0, 0.5) }),
+            
         }
 
         // -------------------- Positions --------------------------- //
@@ -73,13 +93,13 @@ class Base_Scene extends Scene{
 
         // -------------------- Players stats ----------------------- //
         this.alive = true; 
-        this.credit_count = 0; 
         this.player_colors = [hex_color('#7DAD80'), 
                             hex_color('#8DAD51'), 
                             hex_color('#AD8C8F'),
                             hex_color('#AD6561'),
                             hex_color('#7199AD')];
         this.player_color_index = 0; 
+        this.credits = 0; 
 
         // -------- Smaller fishes and larger fishes/shraks ----------// 
 
@@ -102,12 +122,7 @@ class Base_Scene extends Scene{
         this.sharks_time_offset = Array(4).fill(0); 
         this.shark_num = 4; // there are always five sharks in the scene 
         this.shark_speed = 1; 
-        
     }
-    
-}
-
-export class Preying_Frenzy_Scene extends Base_Scene {
 
     display(context, program_state) {
         let model_tranform = Mat4.identity(); 
@@ -228,6 +243,13 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             player_fish_fin_transform_below = player_fish_fin_transform_below.times(Mat4.translation(0.4,-0.8,0,0))
                 .times(Mat4.rotation(-Math.PI*1.25, 0, 0, 1));
             this.shapes.fish_tail.draw(context, program_state, player_fish_fin_transform_below, this.materials.fish_tail.override({color:color}));
+
+            // Collision detection 
+            this.detect_fish();
+            this.detect_shark(); 
+
+            // Credits 
+            this.display_credits(context, program_state);
         }
     }
 
@@ -314,5 +336,43 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         environment_transform = environment_transform.times(Mat4.translation(-8,10,2))
             .times(Mat4.scale(28,30,34));
         this.shapes.environment_sphere.draw(context, program_state, environment_transform, this.materials.environment_sphere);
+    }
+
+    // Detect collision with a small fish 
+    detect_fish() {
+        let collision_detected = false; 
+        /* ---------- collision detection ---------- */ 
+
+
+        if (collision_detected) {
+            this.credits += 1; 
+            return this.credits; 
+        }
+        return -1; 
+    }
+
+    /* Detect collision with a shark 
+     * returns -1 if no collision with shark is detected 
+     * otherwise, return credits earned 
+     */ 
+    detect_shark(){
+        let collision_detected = false; 
+        /* ---------- collision detection ---------- */ 
+
+
+        if (collision_detected) {
+            this.alive = false; 
+            return this.credits;
+        }
+        return -1; 
+    }
+
+    display_credits(context, program_state) {
+        let lifes_model = Mat4.identity().times(Mat4.translation(-17,19,4,0)).times(Mat4.scale(3,0.5,1,1));
+        let text1_trans = Mat4.identity().times(Mat4.translation(-24, 20.25, 0,0)).times(Mat4.scale(0.8, 0.8, 1,1));
+        let player_credits = this.credits;
+        this.shapes.text.set_string("Credits:"+player_credits, context.context);
+        this.shapes.text.draw(context, program_state, text1_trans, this.materials.credit_text);
+        this.shapes.square.draw(context, program_state, lifes_model.times(Mat4.scale(2, 2, .50)), this.materials.credit_square);
     }
 }
