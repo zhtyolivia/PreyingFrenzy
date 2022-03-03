@@ -88,8 +88,8 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         }
 
         // -------------------- Positions --------------------------- //
-        this.player_x_pos = 0; 
-        this.player_y_pos = 0; 
+        this.player_x_pos = -7; 
+        this.player_y_pos = 40; 
 
         // -------------------- Players stats ----------------------- //
         this.alive = true; 
@@ -113,12 +113,8 @@ export class Preying_Frenzy_Scene extends Base_Scene {
 
         // TODO: adjust shark position boundaries!!!!
         // Initially, 5 sharks are randomly places in the scene
-        this.sharks_x = Array.from({length: 4}, () => Math.floor(Math.random() * 6.5 - 1.5));
+        this.sharks_x = Array.from({length: 4}, () => Math.floor(Math.random() * 13 - 8));
         this.sharks_y = [Math.floor(Math.random() * 3), Math.floor(Math.random() * 3 + 4), Math.floor(Math.random() * 3 + 7), Math.floor(Math.random() * 3 + 11)];
-        //this.shark_y[0] = Math.floor(Math.random() * 4);
-        //this.shark_y[1] = Math.floor(Math.random() * 3 + 4);
-        //this.shark_y[2] = Math.floor(Math.random() * 3 + 7);
-        //this.shark_y[3] = Math.floor(Math.random() * 3 + 10);
         this.sharks_time_offset = Array(4).fill(0); 
         this.shark_num = 4; // there are always five sharks in the scene 
         this.shark_speed = 1; 
@@ -339,12 +335,25 @@ export class Preying_Frenzy_Scene extends Base_Scene {
     }
 
     // Detect collision with a small fish 
-    detect_fish() {
-        let collision_detected = false; 
+    detect_fish(fish_index, t, speed) {
         /* ---------- collision detection ---------- */ 
+        let player_x = this.player_x_pos;
+        let player_y = this.player_y_pos;
 
+        let fish_coord_x = this.fishes_x[fish_index] + speed * (t - this.fishes_time_offset[fish_index])
+        let fish_coord_y = this.fishes_y[fish_index]
+        
+        //fish_x_cord converted to turtle_x coords using equation: fish_scale_playerx = fish_x_cord(-2.5) - 32
+        //fish_x_cord converted to turtle_x coords using equation: fish_scale_playery = fish_y_cord(4)
 
-        if (collision_detected) {
+        // Get player and fishes on the same scale
+        
+        let fish_scale_playerx = fish_coord_x * (-2.5) - 32;
+        let fish_scale_playery = fish_coord_y * 4;
+        
+        
+
+        if (Math.abs(fish_scale_playerx - player_x) < 2 && Math.abs(fish_scale_playery - player_y < 3)) {
             this.credits += 1; 
             return this.credits; 
         }
@@ -355,12 +364,24 @@ export class Preying_Frenzy_Scene extends Base_Scene {
      * returns -1 if no collision with shark is detected 
      * otherwise, return credits earned 
      */ 
-    detect_shark(){
-        let collision_detected = false; 
+    detect_shark(shark_index, t, speed){
+        let collision_detected = false;
+        
         /* ---------- collision detection ---------- */ 
+        let player_x = this.player_x_pos;
+        let player_y = this.player_y_pos; 
 
+        let shark_coord_x = this.sharks_x[shark_index] + speed * (t - this.sharks_time_offset[shark_index]);
+        let shark_coord_y = this.sharks_y[shark_index]; 
 
-        if (collision_detected) {
+        // Get player and sharks on the same scale
+        //shark_x_cord converted to turtle_x coords using equation: fish_scale_playerx = shark_x_cord(4)
+        //shark_x_cord converted to turtle_x coords using equation: fish_scale_playery = shark_y_cord(6.15)
+
+        let shark_scale_playerx = shark_coord_x * 4;
+        let shark_scale_playery = shark_coord_y * 6.15;
+        
+        if (Math.abs(shark_scale_playerx - player_x) < 4 && Math.abs(shark_scale_playery - player_y < 5)) {
             this.alive = false; 
             return this.credits;
         }
