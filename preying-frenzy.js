@@ -88,8 +88,8 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         }
 
         // -------------------- Positions --------------------------- //
-        this.player_x_pos = -7; 
-        this.player_y_pos = 40; 
+        this.player_x_pos = 20; 
+        this.player_y_pos = 0; 
 
         // -------------------- Players stats ----------------------- //
         this.alive = true; 
@@ -190,6 +190,7 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             for (let i = 0; i < this.fish_num; i++) {
                 this.display_small_fish(context, program_state, model_transform, i, t/1000);
                 /* TODO: detect collision here */
+                this.detect_fish(i, t/1000, this.fish_speed);
             }
             
         }
@@ -247,6 +248,11 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             // Credits 
             this.display_credits(context, program_state);
         }
+    }
+    new_fish(fish_index, t){
+        this.fishes_x[fish_index] = 18;
+        this.fishes_y[fish_index] = Math.floor(Math.random() * 20); 
+        this.fishes_time_offset[fish_index] = t; 
     }
 
     display_small_fish(context, program_state, model_transform, fish_index, t) {
@@ -340,21 +346,24 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         let player_x = this.player_x_pos;
         let player_y = this.player_y_pos;
 
-        let fish_coord_x = this.fishes_x[fish_index] + speed * (t - this.fishes_time_offset[fish_index])
-        let fish_coord_y = this.fishes_y[fish_index]
+        let fish_coord_x = this.fishes_x[fish_index] - (speed * (t - this.fishes_time_offset[fish_index]));
+        let fish_coord_y = this.fishes_y[fish_index];
         
-        //fish_x_cord converted to turtle_x coords using equation: fish_scale_playerx = fish_x_cord(-2.5) - 32
+
+        //fish_x_cord converted to turtle_x coords using equation: fish_scale_playerx = fish_x_cord(30/23) - 22/23
         //fish_x_cord converted to turtle_x coords using equation: fish_scale_playery = fish_y_cord(4)
 
         // Get player and fishes on the same scale
         
-        let fish_scale_playerx = fish_coord_x * (-2.5) - 32;
-        let fish_scale_playery = fish_coord_y * 4;
+        let fish_scale_playerx = fish_coord_x * (30/23) + (22/23);
+        let fish_scale_playery = fish_coord_y * (4);
         
-        
+        let test_abx = Math.abs(fish_scale_playerx - player_x);
+        let test_aby = Math.abs(fish_scale_playery - player_y < 3);
 
-        if (Math.abs(fish_scale_playerx - player_x) < 2 && Math.abs(fish_scale_playery - player_y < 3)) {
-            this.credits += 1; 
+        if (Math.abs(fish_scale_playerx - player_x) < 3 && Math.abs(fish_scale_playery - player_y) < 4.5) {
+            this.new_fish(fish_index, t);
+            this.credits += 1;
             return this.credits; 
         }
         return -1; 
@@ -396,4 +405,5 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         this.shapes.text.draw(context, program_state, text1_trans, this.materials.credit_text);
         this.shapes.square.draw(context, program_state, lifes_model.times(Mat4.scale(2, 2, .50)), this.materials.credit_square);
     }
+
 }
