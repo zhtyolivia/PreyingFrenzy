@@ -1,5 +1,5 @@
 import {defs, tiny} from './examples/common.js';
-import {Gouraud_Shader, Tail_Shader, Shark_Body_Shader} from  './examples/shaders.js';
+import {Gouraud_Shader, Tail_Shader, Shark_Body_Shader, Bubble_Shader} from  './examples/shaders.js';
 import { Text_Line } from './examples/text-demo.js';
 
 const {
@@ -44,8 +44,9 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             shark_tail: new defs.Triangle(),
             shark_fin: new defs.Closed_Cone(15,15),
 
-            // Shapes for the environment
+            // Shapes for the environment and decorations 
             environment_sphere: new defs.Subdivision_Sphere(4), 
+            bubble: new defs.Subdivision_Sphere(4),
             
             // Shape for text 
             text: new Text_Line(35),
@@ -60,6 +61,10 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             // Environment / background 
             environment_sphere: new Material(textured,
                 {ambient: 1, texture: new Texture("./assets/ocean.png")}),
+            
+            // Bubbles 
+            bubble: new Material(new Bubble_Shader(),
+                {ambient: .8, diffusivity: .6, color:hex_color('#ffffff')}),
 
             // Shark
             shark: new Material(new Gouraud_Shader(),
@@ -118,6 +123,12 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         this.sharks_time_offset = Array(4).fill(0); 
         this.shark_num = 4; // there are always five sharks in the scene 
         this.shark_speed = 1; 
+
+        // ------------------------ Bubbles ------------------------// 
+        this.bubble_offsets = [0, -1000, -2000, 0, -1000, -2000];
+        this.bubble_x = [10, 10, 10, -18, -18, -18];
+        this.bubble_y = [0,0,0,0,0,0];
+        this.bubble_z = [-20, -20, -20, -10, -10, -10];
     }
 
     display(context, program_state) {
@@ -140,13 +151,13 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         // Up movement 
         this.key_triggered_button("Up", ["ArrowUp"], () => {
             if (this.player_y_pos < 80) {
-                this.player_y_pos += 1; 
+                this.player_y_pos += 1.5; 
             }
         })
         // down movement 
         this.key_triggered_button("Down", ["ArrowDown"], () => {
             if (this.player_y_pos > 0) {
-                this.player_y_pos -= 1; 
+                this.player_y_pos -= 1.5; 
             }
         })
         // Left movement 
@@ -180,10 +191,7 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         let light_color = this.light_color; 
 
         // Draw background 
-
         this.display_environment(context, program_state, model_transform);
-
-        // Draw accumulated points and buttons 
 
         // Draw smaller fishes 
         if (this.alive) {
@@ -206,6 +214,8 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             }
         }
         
+        // Draw bubbles 
+        this.display_bubbles(context, program_state);
     }
 
     display_player_fish(context, program_state, model_transform ) {
@@ -336,7 +346,7 @@ export class Preying_Frenzy_Scene extends Base_Scene {
     display_environment(context, program_state, model_tranform){
         let environment_transform = model_tranform;
         environment_transform = environment_transform.times(Mat4.translation(-8,10,2))
-            .times(Mat4.scale(28,30,34));
+            .times(Mat4.scale(38,40,34));
         this.shapes.environment_sphere.draw(context, program_state, environment_transform, this.materials.environment_sphere);
     }
 
@@ -404,6 +414,33 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         this.shapes.text.set_string("Credits:"+player_credits, context.context);
         this.shapes.text.draw(context, program_state, text1_trans, this.materials.credit_text);
         this.shapes.square.draw(context, program_state, lifes_model.times(Mat4.scale(2, 2, .50)), this.materials.credit_square);
+    }
+
+    display_bubbles(context, program_state) {
+        const t = program_state.animation_time, dt = program_state.animation_delta_time / 1000;
+        if (t < 1000) {
+            return;
+        }
+        for(let i = 0; i < 6; i++) {
+            let delta_y = (t - this.bubble_offsets[i]) / 50000;
+            let x_pos = this.bubble_x[i];
+            let new_y_pos = this.bubble_y[i] + delta_y; 
+            let new_radius = (t - this.bubble_offsets[i]) / 4500;
+            if (new_y_pos < 34 && new_y_pos >= 0) {
+                this.bubble_y[i] = new_y_pos; 
+                let bubble_transform = Mat4.identity().times(Mat4.translation(x_pos, new_y_pos, this.bubble_z[i], 0)).times(Mat4.scale(new_radius, new_radius, new_radius, 1));
+                this.shapes.bubble.draw(context, program_state, bubble_transform, this.materials.bubble);
+            } else if (new_y_pos < 0) {
+                // this.bubble_offsets[i] = t; 
+                this.bubble_y[i] = new_y_pos; 
+            } else if (new_y_pos >= 30) {
+                this.bubble_offsets[i] = t; 
+                this.bubble_y[i] = 0;
+            } else if (new_y_pos = 0) {
+                this.bubble_offsets[i] = t; 
+                this.bubble_y[i] = 0; 
+            }  
+        }
     }
 
 }
