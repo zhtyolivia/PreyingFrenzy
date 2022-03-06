@@ -93,11 +93,11 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         }
 
         // -------------------- Positions --------------------------- //
-        this.player_x_pos = 20; 
-        this.player_y_pos = 0; 
+        this.player_x_pos = -5; 
+        this.player_y_pos = 35; 
 
         // -------------------- Players stats ----------------------- //
-        this.alive = true; 
+        this.alive = true;
         this.player_colors = [hex_color('#7DAD80'), 
                             hex_color('#8DAD51'), 
                             hex_color('#AD8C8F'),
@@ -180,6 +180,12 @@ export class Preying_Frenzy_Scene extends Base_Scene {
                 this.player_color_index = 0; 
             }
         })
+        // Restart 
+        this.key_triggered_button("Restart", ["Enter"], () => {
+            if (!this.alive) {
+                this.alive = true;
+            } 
+        })
     }
 
     display_scene(context, program_state){
@@ -194,28 +200,30 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         this.display_environment(context, program_state, model_transform);
 
         // Draw smaller fishes 
-        if (this.alive) {
-            for (let i = 0; i < this.fish_num; i++) {
-                this.display_small_fish(context, program_state, model_transform, i, t/1000);
-                /* TODO: detect collision here */
-                this.detect_fish(i, t/1000, this.fish_speed);
-            }
-            
+        for (let i = 0; i < this.fish_num; i++) {
+            this.display_small_fish(context, program_state, model_transform, i, t/1000);
+            /* TODO: detect collision here */
+            this.detect_fish(i, t/1000, this.fish_speed);
         }
+
         // Draw player fish 
         if (this.alive) {
             this.display_player_fish(context, program_state, model_transform); 
         }
 
         // Draw sharks
-        if (this.alive) {
-            for (let j = 0; j < this.shark_num; j++){
-                this.display_shark(context, program_state, model_transform, j, t/1000);  
-            }
+        for (let j = 0; j < this.shark_num; j++){
+            this.display_shark(context, program_state, model_transform, j, t/1000);  
         }
         
         // Draw bubbles 
         this.display_bubbles(context, program_state);
+
+        // Game Over 
+        if (!this.alive){
+            this.display_game_over(context, program_state);
+        }
+        
     }
 
     display_player_fish(context, program_state, model_transform ) {
@@ -431,7 +439,6 @@ export class Preying_Frenzy_Scene extends Base_Scene {
                 let bubble_transform = Mat4.identity().times(Mat4.translation(x_pos, new_y_pos, this.bubble_z[i], 0)).times(Mat4.scale(new_radius, new_radius, new_radius, 1));
                 this.shapes.bubble.draw(context, program_state, bubble_transform, this.materials.bubble);
             } else if (new_y_pos < 0) {
-                // this.bubble_offsets[i] = t; 
                 this.bubble_y[i] = new_y_pos; 
             } else if (new_y_pos >= 30) {
                 this.bubble_offsets[i] = t; 
@@ -441,6 +448,20 @@ export class Preying_Frenzy_Scene extends Base_Scene {
                 this.bubble_y[i] = 0; 
             }  
         }
+    }
+
+    display_game_over(context, program_state) {
+        let square_transform = Mat4.identity().times(Mat4.translation(-4.5, 10, 4, 0)).times(Mat4.scale(3.3,1.8,1,1));
+        let text_transform = Mat4.identity().times(Mat4.translation(-9.2, 11, 6,0)).times(Mat4.scale(0.8, 0.8, 1,1));
+        let player_credits = this.credits;
+        this.shapes.text.set_string("Game Over", context.context);
+        this.shapes.square.draw(context, program_state, square_transform.times(Mat4.scale(2, 2, .50)), this.materials.credit_square);
+        this.shapes.text.draw(context, program_state, text_transform, this.materials.credit_text);
+        this.shapes.text.set_string("Total Credits: " + player_credits, context.context);
+        this.shapes.text.draw(context, program_state, text_transform.times(Mat4.translation(0.27, -2.4, 0, 0).times(Mat4.scale(0.5, 0.5, 1, 1))), this.materials.credit_text);
+        this.shapes.text.set_string("Press Enter to Restart", context.context);
+        this.shapes.text.draw(context, program_state, text_transform.times(Mat4.translation(-0.4, -3.8, 0, 0).times(Mat4.scale(0.4, 0.4, 1, 1))), this.materials.credit_text);
+
     }
 
 }
