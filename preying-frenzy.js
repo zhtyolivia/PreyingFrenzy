@@ -213,7 +213,8 @@ export class Preying_Frenzy_Scene extends Base_Scene {
 
         // Draw sharks
         for (let j = 0; j < this.shark_num; j++){
-            this.display_shark(context, program_state, model_transform, j, t/1000);  
+            this.display_shark(context, program_state, model_transform, j, t/1000);
+            this.detect_shark(j, t/1000, this.shark_speed);
         }
         
         // Draw bubbles 
@@ -398,17 +399,19 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         let player_x = this.player_x_pos;
         let player_y = this.player_y_pos; 
 
-        let shark_coord_x = this.sharks_x[shark_index] + speed * (t - this.sharks_time_offset[shark_index]);
+        let shark_coord_x = this.sharks_x[shark_index] - speed * (t - this.sharks_time_offset[shark_index]);
         let shark_coord_y = this.sharks_y[shark_index]; 
 
         // Get player and sharks on the same scale
         //shark_x_cord converted to turtle_x coords using equation: fish_scale_playerx = shark_x_cord(4)
         //shark_x_cord converted to turtle_x coords using equation: fish_scale_playery = shark_y_cord(6.15)
 
-        let shark_scale_playerx = shark_coord_x * 4;
-        let shark_scale_playery = shark_coord_y * 6.15;
-        
-        if (Math.abs(shark_scale_playerx - player_x) < 4 && Math.abs(shark_scale_playery - player_y < 5)) {
+        let shark_scale_playerx = shark_coord_x * 4.16 - 0.72;
+        let shark_scale_playery = shark_coord_y * 80/13;
+
+        let testxdiff = Math.abs(shark_scale_playerx - player_x);
+        let testydiff = Math.abs(shark_scale_playery - player_y);
+        if (Math.abs(shark_scale_playerx - player_x) < 4 && Math.abs(shark_scale_playery - player_y) < 8) {
             this.alive = false; 
             return this.credits;
         }
