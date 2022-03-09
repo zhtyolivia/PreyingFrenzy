@@ -184,12 +184,6 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         this.key_triggered_button("Restart", ["Enter"], this.restart_game);
     }
 
-    restart_game(){
-        if (!this.alive) {
-            this.credits = 0;
-            this.alive = true;
-        }
-    }
 
     display_scene(context, program_state){
         let model_transform = Mat4.identity(); 
@@ -228,6 +222,13 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             this.display_game_over(context, program_state);
         }
         
+    }
+    
+    restart_game(){
+        if (!this.alive) {
+            this.credits = 0;
+            this.alive = true;
+        }
     }
 
     display_player_fish(context, program_state, model_transform ) {
@@ -274,6 +275,24 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         this.fishes_time_offset[fish_index] = t; 
     }
 
+    new_shark(shark_index, t, y_coord){
+        this.sharks_x[shark_index] = 7;
+            if (y_coord >= 0 && y_coord <= 3){
+                this.sharks_y[shark_index] = Math.floor(Math.random() * 3);
+            }
+            else if (y_coord > 3 && y_coord <= 6){
+                this.sharks_y[shark_index] = Math.floor(Math.random() * 3 + 4);
+            }
+            else if(y_coord > 6 && y_coord <= 9) {
+                this.sharks_y[shark_index] = Math.floor(Math.random() * 3 + 7);
+            }
+            else if(y_coord > 9){
+                this.sharks_y[shark_index] = Math.floor(Math.random() * 3 + 11);
+            }
+            //this.sharks_y[shark_index] = Math.floor(Math.random() * 13); 
+            this.sharks_time_offset[shark_index] = t;
+    }
+
     display_small_fish(context, program_state, model_transform, fish_index, t) {
         // var: function scoped 
         // let: block scoped 
@@ -296,9 +315,7 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             this.shapes.fish_tail.draw(context, program_state, fish_tail_transform, this.materials.fish_tail); 
         } else {
             // Create a new fish when a fish exits from the left edge
-            this.fishes_x[fish_index] = 18;
-            this.fishes_y[fish_index] = Math.floor(Math.random() * 20); 
-            this.fishes_time_offset[fish_index] = t; 
+            this.new_fish(fish_index, t); 
         }
     }
 
@@ -334,21 +351,7 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             this.shapes.shark_fin.draw(context, program_state, shark_fin_transform, this.materials.shark);
             this.shapes.shark_fin.draw(context, program_state, shark_fin2_transform, this.materials.shark);
         } else {
-            this.sharks_x[shark_index] = 7;
-            if (y_coord >= 0 && y_coord <= 3){
-                this.sharks_y[shark_index] = Math.floor(Math.random() * 3);
-            }
-            else if (y_coord > 3 && y_coord <= 6){
-                this.sharks_y[shark_index] = Math.floor(Math.random() * 3 + 4);
-            }
-            else if(y_coord > 6 && y_coord <= 9) {
-                this.sharks_y[shark_index] = Math.floor(Math.random() * 3 + 7);
-            }
-            else{
-                this.sharks_y[shark_index] = Math.floor(Math.random() * 3 + 11);
-            }
-            //this.sharks_y[shark_index] = Math.floor(Math.random() * 13); 
-            this.sharks_time_offset[shark_index] = t;
+            this.new_shark(shark_index, t, this.sharks_y[shark_index]);
         }
     }
 
@@ -412,7 +415,8 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         let testxdiff = Math.abs(shark_scale_playerx - player_x);
         let testydiff = Math.abs(shark_scale_playery - player_y);
         if (Math.abs(shark_scale_playerx - player_x) < 4 && Math.abs(shark_scale_playery - player_y) < 8) {
-            this.alive = false; 
+            this.new_shark(shark_index, t);
+            this.alive = false;
             return this.credits;
         }
         return -1; 
