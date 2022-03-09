@@ -16,7 +16,7 @@ class Base_Scene extends Scene{
         this.initial_camera_position = Mat4.translation(5, -10, -30); 
 
         // -------------------- Sounds and music ---------------------- //
-        
+        // nothing for now
 
         // -------------------- Light color --------------------------- //
         this.light_color = color(1,1,1,1);
@@ -181,11 +181,14 @@ export class Preying_Frenzy_Scene extends Base_Scene {
             }
         })
         // Restart 
-        this.key_triggered_button("Restart", ["Enter"], () => {
-            if (!this.alive) {
-                this.alive = true;
-            } 
-        })
+        this.key_triggered_button("Restart", ["Enter"], this.restart_game);
+    }
+
+    restart_game(){
+        if (!this.alive) {
+            this.credits = 0;
+            this.alive = true;
+        }
     }
 
     display_scene(context, program_state){
@@ -260,14 +263,11 @@ export class Preying_Frenzy_Scene extends Base_Scene {
                 .times(Mat4.rotation(-Math.PI*1.25, 0, 0, 1));
             this.shapes.fish_tail.draw(context, program_state, player_fish_fin_transform_below, this.materials.fish_tail.override({color:color}));
 
-            // Collision detection 
-            this.detect_fish();
-            this.detect_shark(); 
-
             // Credits 
             this.display_credits(context, program_state);
         }
     }
+
     new_fish(fish_index, t){
         this.fishes_x[fish_index] = 18;
         this.fishes_y[fish_index] = Math.floor(Math.random() * 20); 
@@ -454,9 +454,9 @@ export class Preying_Frenzy_Scene extends Base_Scene {
     }
 
     display_game_over(context, program_state) {
+        let player_credits = this.credits;
         let square_transform = Mat4.identity().times(Mat4.translation(-4.5, 10, 4, 0)).times(Mat4.scale(3.3,1.8,1,1));
         let text_transform = Mat4.identity().times(Mat4.translation(-9.2, 11, 6,0)).times(Mat4.scale(0.8, 0.8, 1,1));
-        let player_credits = this.credits;
         this.shapes.text.set_string("Game Over", context.context);
         this.shapes.square.draw(context, program_state, square_transform.times(Mat4.scale(2, 2, .50)), this.materials.credit_square);
         this.shapes.text.draw(context, program_state, text_transform, this.materials.credit_text);
@@ -464,7 +464,6 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         this.shapes.text.draw(context, program_state, text_transform.times(Mat4.translation(0.27, -2.4, 0, 0).times(Mat4.scale(0.5, 0.5, 1, 1))), this.materials.credit_text);
         this.shapes.text.set_string("Press Enter to Restart", context.context);
         this.shapes.text.draw(context, program_state, text_transform.times(Mat4.translation(-0.4, -3.8, 0, 0).times(Mat4.scale(0.4, 0.4, 1, 1))), this.materials.credit_text);
-
     }
 
 }
