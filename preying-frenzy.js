@@ -228,6 +228,8 @@ export class Preying_Frenzy_Scene extends Base_Scene {
         if (!this.alive) {
             this.credits = 0;
             this.alive = true;
+            this.player_x_pos = -5; 
+            this.player_y_pos = 35; 
         }
     }
 
