@@ -1,7 +1,9 @@
-
 # Preying Frenzy
 ## Project Description 
 This is a project create for CS 174A in UCLA with professor Law. This project aims to create a one-player game in which the player can control the fish to move around in the water by using arrow keys. The player fish moves from the left to the right, while other fishes and sharks move from the right to the left. The goal of this game is to eat as many smaller fish as possible to earn more credits which will show on the upper left corner of the screen; meanwhile, the user should avoid the sharks, and as long as the player collides with the sharks, the game will be over. 
+
+<img width="1074" alt="game" src="https://user-images.githubusercontent.com/61040219/157575656-ec7100c3-32b2-4a22-930b-8b768d268ef2.png">
+
 
 ## Rules & How to Play 
 To play the game, 
